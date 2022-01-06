@@ -94,7 +94,13 @@ func LoginController(ctx *gin.Context) {
 	}
 
 	// 发放TOKEN
-	token := "token"
+	token, err := common.ReleaseToken(user)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "系统内部错误"})
+		log.Printf("token generate error : %v", err)
+		return
+	}
+	// token := "11"
 
 	// 登录成功
 	ctx.JSON(http.StatusOK, gin.H{
