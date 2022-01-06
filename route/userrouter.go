@@ -13,5 +13,7 @@ func UserRoute(r *gin.Engine) *gin.Engine {
 	})
 
 	r.POST("/api/auth/register", controller.RegisterController)
+	r.POST("/api/auth/login", controller.LoginController)
+
 	return r
 }
