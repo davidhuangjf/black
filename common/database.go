@@ -4,6 +4,7 @@ import (
 	"dyk/model"
 	"fmt"
 
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -11,12 +12,14 @@ import (
 var DB *gorm.DB
 
 func InitDB() *gorm.DB {
-	username := "root"
-	password := "Admwork0620"
-	host := "localhost"
-	port := "3306"
-	database := "gin"
-	charset := "utf8mb4"
+	username := viper.GetString("datasource.username")
+	// username := "root"
+	password := viper.GetString("datasource.password")
+	host := viper.GetString("datasource.host")
+	port := viper.GetString("datasource.port")
+	database := viper.GetString("datasource.database")
+	charset := viper.GetString("datasource.charset")
+
 	// driverName := "mysql"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
 		username,

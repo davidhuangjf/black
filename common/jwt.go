@@ -23,7 +23,7 @@ func ReleaseToken(user model.User) (string, error) {
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "admwork",
-			Subject:   "token",
+			Subject:   "user token",
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

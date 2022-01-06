@@ -2,7 +2,9 @@ package controller
 
 import (
 	"dyk/common"
+	"dyk/dto"
 	"dyk/model"
+	"dyk/response"
 	"dyk/util"
 	"log"
 	"net/http"
@@ -30,11 +32,13 @@ func RegisterController(ctx *gin.Context) {
 	telephone := ctx.PostForm("telephone")
 	// 数据验证  手机
 	if len(telephone) != 11 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "手机号必须是11位"})
+		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "手机号必须是11位")
+		// ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "手机号必须是11位"})
 		return
 	}
 	if len(password) < 6 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "密码不能小于6位"})
+		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "密码不能小于6位")
+		// ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "密码不能小于6位"})
 		return
 	}
 	// 没有输入名称自动随机创建10位用户名
@@ -44,13 +48,15 @@ func RegisterController(ctx *gin.Context) {
 	log.Println(name, password, telephone)
 	// 确认电话号码是存在
 	if isTelephoneExist(DB, telephone) {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "用户已经存在"})
+		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "用户已经存在")
+		// ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "用户已经存在"})
 		return
 	}
 	// 密码加密
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "加密错误"})
+		response.Response(ctx, http.StatusInternalServerError, 500, nil, "加密错误")
+		// ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "加密错误"})
 		return
 	}
 	// 创建用户
@@ -61,9 +67,10 @@ func RegisterController(ctx *gin.Context) {
 	}
 	DB.Create(&newuser)
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 200, "msg": "注册成功",
-	})
+	response.Success(ctx, nil, "注册成功")
+	// ctx.JSON(http.StatusOK, gin.H{
+	// 	"code": 200, "msg": "注册成功",
+	// })
 }
 
 func LoginController(ctx *gin.Context) {
@@ -73,39 +80,51 @@ func LoginController(ctx *gin.Context) {
 	password := ctx.PostForm("password")
 	// 数据合规性验证
 	if len(telephone) != 11 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "手机号必须是11位"})
+		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "手机号必须是11位")
+		// ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "手机号必须是11位"})
 		return
 	}
 	if len(password) < 6 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "密码不能小于6位"})
+		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "密码不能小于6位")
+		// ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "密码不能小于6位"})
 		return
 	}
 	// 判断手机号是否存在
 	var user model.User
 	DB.Where("telephone =?", telephone).First(&user)
 	if user.ID == 0 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "用户不存在"})
+		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "用户不存在")
+		// ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "用户不存在"})
 		return
 	}
 	// 判断密码是否正确
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "密码错误"})
+		response.Response(ctx, http.StatusBadRequest, 400, nil, "密码错误")
+		// ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "密码错误"})
 		return
 	}
 
 	// 发放TOKEN
 	token, err := common.ReleaseToken(user)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "系统内部错误"})
+		response.Response(ctx, http.StatusInternalServerError, 500, nil, "系统内部错误")
+		// ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "系统内部错误"})
 		log.Printf("token generate error : %v", err)
 		return
 	}
 	// token := "11"
 
 	// 登录成功
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"data": gin.H{"token": token},
-		"msg":  "注册成功",
-	})
+	// ctx.JSON(http.StatusOK, gin.H{
+	// 	"code": 200,
+	// 	"data": gin.H{"token": token},
+	// 	"msg":  "注册成功",
+	// })
+	response.Success(ctx, gin.H{"token": token}, "登录成功")
+}
+
+func InfoController(ctx *gin.Context) {
+	user, _ := ctx.Get("user")
+	response.Success(ctx, gin.H{"user": dto.ToUserDto(user.(model.User))}, "")
+	// ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"user": dto.ToUserDto(user.(model.User))}})
 }

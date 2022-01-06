@@ -1,0 +1,12 @@
+# server setting 
+server:
+  port: 1016
+
+# dbserver link setting
+datasource:
+  username: root
+  password: Admwork0620
+  host: localhost
+  port: 3306
+  database: gin
+  charset: utf8mb4
