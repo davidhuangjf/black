@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dyk/model"
 	"fmt"
 	"log"
 	"math/rand"
@@ -21,14 +22,6 @@ func RandomString(n int) string {
 		result[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(result)
-}
-
-type User struct {
-	gorm.Model
-	Name      string `gorm:"type:varchar(20);not null"`
-	Telephone string `gorm:"type:varchar(11);not null;unique"`
-	Password  string `gorm:"type:varchar(128);not null"`
-	// Password2 string `gorm:"type:varchar(128)"`
 }
 
 func InitDB() *gorm.DB {
@@ -61,14 +54,14 @@ func InitDB() *gorm.DB {
 		fmt.Println(err.Error())
 	}
 	// 自动创建数据表
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&model.User{})
 
 	return db
 }
 
 // 检查是否存在相同手机号的用户
 func isTelephoneExist(db *gorm.DB, telephone string) bool {
-	var user User
+	var user model.User
 	db.Where("telephone = ?", telephone).First(&user)
 	if user.ID != 0 {
 		return true
@@ -120,7 +113,7 @@ func main() {
 			return
 		}
 		// 创建用户
-		newuser := User{
+		newuser := model.User{
 			Name:      name,
 			Password:  password,
 			Telephone: telephone,
@@ -136,3 +129,13 @@ func main() {
 	panic(r.Run())
 
 }
+
+// package main
+
+// import "github.com/gin-gonic/gin"
+
+// func main() {
+// 	r := gin.Default()
+
+// 	r.Run()
+// }
