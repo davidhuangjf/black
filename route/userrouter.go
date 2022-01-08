@@ -9,6 +9,20 @@ import (
 )
 
 func UserRoute(r *gin.Engine) *gin.Engine {
+	r.Use(middleware.CORSMiddleware())
+
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"*"},
+	// 	AllowMethods:     []string{"PUT", "PATCH"},
+	// 	AllowHeaders:     []string{"Origin"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// 	AllowOriginFunc: func(origin string) bool {
+	// 		return origin == "*"
+	// 	},
+	// 	MaxAge: 12 * time.Hour,
+	// }))
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello word")
 	})

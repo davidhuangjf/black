@@ -6,6 +6,8 @@ import (
 	"dyk/model"
 	"dyk/response"
 	"dyk/util"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -25,11 +27,34 @@ func isTelephoneExist(db *gorm.DB, telephone string) bool {
 }
 
 func RegisterController(ctx *gin.Context) {
+	// DB := common.GetDB()
 	DB := common.InitDB()
 	//获取参数
-	name := ctx.PostForm("name")
-	password := ctx.PostForm("password")
-	telephone := ctx.PostForm("telephone")
+
+	// var requestUser = model.User{}
+	// // json.NewDecoder(ctx.Request.Body).Decode(&requestUser)
+	// gin.Bind(&requestUser)
+	// name := requestUser.Name
+	// password := requestUser.Password
+	// telephone := requestUser.Telephone
+	// =====================================================
+	// json := model.User{}
+	// ctx.BindJSON(&json)
+	// name := json.Name
+	// password := json.Password
+	// telephone := json.Telephone
+	// =====================================================
+	var requestUser = model.User{}
+	json.NewDecoder(ctx.Request.Body).Decode(&requestUser)
+	fmt.Println(requestUser.Name, requestUser.Password, requestUser.Telephone)
+	name := requestUser.Name
+	password := requestUser.Password
+	telephone := requestUser.Telephone
+
+	// name := ctx.PostForm("name")
+	// password := ctx.PostForm("password")
+	// telephone := ctx.PostForm("telephone")
+
 	// 数据验证  手机
 	if len(telephone) != 11 {
 		response.Response(ctx, http.StatusUnprocessableEntity, 422, nil, "手机号必须是11位")
